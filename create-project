@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# This script creates a new directory in your project dir, initialized
+# with a git repository. It is assumed that project dir is set at env var $WWW
+www="$WWW";
+
+# start by getting the project name from user
+read -p 'project name > ' directory;
+if [ ! "$directory" ]
+then
+  echo 'Specify a name for your project';
+  exit 1;
+fi;
+# TODO: check if project name contains bad characters
+# check if a directory by that name already exists in project dir
+project="${www}/${directory}"
+if [ -a "$project" ]
+then
+  echo "Directory ${directory} already exists in ${www}";
+  exit 1;
+fi;
+# create project directory
+mkdir $project && cd $project;
+# check if creating and navigating to directory was successful
+if [ $? != 0 ]
+then
+  echo "Failed to create $project";
+  exit 1;
+fi;
+# initialize git repo
+git init;
+if [ $? == 0 ]
+# if successful, copy project path to clipboard
+then
+  echo -n $project | pbcopy;
+  echo "project name ($project) copied to clipboard"
+fi;
