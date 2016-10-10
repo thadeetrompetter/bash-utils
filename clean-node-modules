@@ -1,0 +1,51 @@
+#!/bin/bash
+# look for project directories last edited over a month ago and remove
+# node_modules directory from those directories if they contain one.
+
+# Assumes that the project directory is saved to env var $WWW
+
+dir="$WWW";
+
+function check_www_dir () {
+  if [ -d $dir ];
+  then
+    return 0;
+  fi
+  echo "$dir does not exist";
+  exit 1;
+}
+
+# exit if project dir is not available
+check_www_dir;
+
+# look for directories with node modules in project dir
+projects_with_modules=`find $dir -name node_modules -maxdepth 2`;
+
+echo "Looking for old projects with node_modules installed";
+
+# loop over retrieved directories
+for modules_dir in $projects_with_modules;
+do
+  # get project root path
+  project="${modules_dir%%\/node_modules}";
+  # find files in project that have been edited less than 90 days ago
+  # ignoring what's in node_modules or in the .git directory
+  recently_edited_files=$(find "$project" \( -type d -path '*node_modules*' -o -path '*.git*' \) -prune -o -type f -mtime -90 -print);
+  # count the files that were found
+  recent_file_count=$(echo -n "$recently_edited_files" | wc -l);
+  # if no recent files were found
+  if (( $recent_file_count == 0 ))
+  then
+    # redundant check for node_modules existence
+    if [ -d  "$modules_dir" ]; then
+      # prompt the user
+      read -r -p "About to remove '$modules_dir'. Are you sure? [y/N] " response;
+      if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]
+      then
+          # remove node_modules directory
+          echo "removing $modules_dir";
+          rm -r "$modules_dir";
+      fi
+    fi
+  fi
+done
