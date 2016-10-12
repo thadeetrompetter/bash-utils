@@ -8,14 +8,20 @@ type docker &>/dev/null || { \
   echo 'please install docker' && exit 1; \
 };
 
-running=$(docker ps -aq -f 'status=running' -l);
+# get the ID
+# list running docker containers: ps
+# get the ID (and only the id) of the last one started: -ql
+# if it's running: -f 'status=running'
+running=$(docker ps -ql -f 'status=running');
 
+# quit if there is no ID: no containers running
 if [ ! "$running" ];
 then
   echo "no containers currently running";
   exit 1;
 fi
 
+# stop container by name of ID and verbosely report that it has been stopped.
 docker stop "$running" &>/dev/null && { \
   echo "stopped container $running" && exit 0; \
 };
