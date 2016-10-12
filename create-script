@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# This script creates a new script file inside the script directory, sets it to
+# be executable and makes a symlink to it which is stored in the ./bin
+# directory at the same level. This script expects the $SCRIPT_DIR environtment
+# variable to be set.
+script_dir_error='Error: unable to find SCRIPT_DIR, do you have it set as env var?';
+script_noname_error='Error: no name given for script';
+bad_chars_error='Error: bad characters in file name';
+
+# check that $SCRIPT_DIR exists
+[ -d "$SCRIPT_DIR" ] || { \
+  echo $script_dir_error; \
+  exit 1; \
+}
+
+# verify that script name was passed as argument
+[ -n "$1" ] || { \
+  echo $script_noname_error; \
+  exit 1; \
+}
+
+# create script name
+script="${SCRIPT_DIR}/${1}";
+
+# verify that the give script name does not yet exist
+[ ! -f "$script" ] || { \
+  printf 'script %s already exists, select a different name\n' "$1"; \
+  exit 1; \
+}
+
+# verify that the filename does not contain bad characters
+grep -E '[^A-Z|a-z|0-9|-|_]' <<< "$1" &>/dev/null;
+# check the exist code of the above grep. if it's 0 then bad characters will
+# have been found.
+[ $? != 0 ] || { \
+  echo $bad_chars_error; \
+  exit 1; \
+}
+# create script and append sha-bang
+touch "$script" && echo '#!/bin/bash' >> "$script";
+
+ln -s "../${1}" "./bin/${1}";
+
+printf 'created script %s in $SCRIPT_DIR\n' $1;
