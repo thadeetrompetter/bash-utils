@@ -4,7 +4,9 @@
 # one.
 
 # Warn and quit if docker is not installed
-type docker &>/dev/null || { echo 'please install docker' && exit 1; };
+type docker &>/dev/null || { \
+  echo 'please install docker' && exit 1; \
+};
 
 running=$(docker ps -aq -f 'status=running' -l);
 
@@ -14,4 +16,6 @@ then
   exit 1;
 fi
 
-docker stop "$running" &>/dev/null && { echo "stopped container $running" && exit 0; };
+docker stop "$running" &>/dev/null && { \
+  echo "stopped container $running" && exit 0; \
+};
