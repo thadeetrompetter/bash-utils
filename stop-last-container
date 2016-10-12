@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This script stops the most recently created docker container, if there is
+# one.
+
+# Warn and quit if docker is not installed
+type docker &>/dev/null || { echo 'please install docker' && exit 1; };
+
+running=$(docker ps -aq -f 'status=running' -l);
+
+if [ ! "$running" ];
+then
+  echo "no containers currently running";
+  exit 1;
+fi
+
+docker stop "$running" &>/dev/null && { echo "stopped container $running" && exit 0; };
