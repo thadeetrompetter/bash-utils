@@ -1,13 +1,16 @@
 #!/bin/bash
 # Nullify Docker env variables, effectively resetting your docker machine to
 # the default (most likely your local machine)
-# 
+#
 # Usage:
 #
 # eval $(docker-default-box)
 #
 docker_env=$(env | grep -i 'docker');
-if [ -z "$docker_env" ]; then echo ""; fi
+if [ -z "$docker_env" ]; then
+  echo 'no docker env variables found' 1>&2;
+  exit 1;
+fi
 for line in $docker_env;
 do
   echo "export ${line%=*}=\"\"";
