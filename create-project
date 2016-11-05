@@ -29,6 +29,8 @@ then
 fi;
 # initialize git repo
 git init;
+# TODO: make npm init optional through flag
+npm init -y;
 if [ $? == 0 ]
 # if successful, copy project path to clipboard
 then
