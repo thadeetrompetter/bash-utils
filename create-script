@@ -30,7 +30,7 @@ script="${SCRIPT_DIR}/${1}";
 }
 
 # verify that the filename does not contain bad characters
-grep -E '[^A-Z|a-z|0-9|-|_]' <<< "$1" &>/dev/null;
+grep -E '[^A-Za-z0-9_-]' <<< "$1" &>/dev/null;
 # check the exist code of the above grep. if it's 0 then bad characters will
 # have been found.
 [ $? != 0 ] || { \
