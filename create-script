@@ -20,17 +20,25 @@ bad_chars_error='Error: bad characters in file name';
   exit 1; \
 }
 
+script_name="$1";
+
+# go to script dir
+cd "$SCRIPT_DIR" || { \
+  echo 'could not access script dir';
+  exit 1;
+};
+
 # create script name
-script="${SCRIPT_DIR}/${1}";
+script="./${script_name}";
 
 # verify that the give script name does not yet exist
 [ ! -f "$script" ] || { \
-  printf 'script %s already exists, select a different name\n' "$1"; \
+  printf 'script %s already exists, select a different name\n' "$script_name"; \
   exit 1; \
 }
 
 # verify that the filename does not contain bad characters
-grep -E '[^A-Za-z0-9_-]' <<< "$1" &>/dev/null;
+grep -E '[^A-Za-z0-9_-]' <<< "$script_name" &>/dev/null;
 # check the exist code of the above grep. if it's 0 then bad characters will
 # have been found.
 [ $? != 0 ] || { \
@@ -40,6 +48,11 @@ grep -E '[^A-Za-z0-9_-]' <<< "$1" &>/dev/null;
 # create script and append sha-bang
 touch "$script" && echo '#!/bin/bash' >> "$script";
 
-ln -s "../${1}" "./bin/${1}";
 
-printf 'created script %s in $SCRIPT_DIR\n' $1;
+# make symlink
+ln -s "../${script_name}" "./bin/${script_name}";
+
+# make script executable
+chmod +x "./${script_name}";
+
+printf "created script %s in $SCRIPT_DIR\n" $script_name;
