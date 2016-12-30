@@ -1,0 +1,13 @@
+#!/bin/bash
+bb_no_repo="Error: no valid git repository found in $(pwd)";
+gh_cant_set='could not set remote';
+bitbucket_prefix='git@bitbucket.org:voorhoede/';
+github_prefix='git@github.com:voorhoede/';
+bitbucket=$(git remote get-url origin 2>/dev/null);
+# are we in a valid git repository?
+if [[ ! $bitbucket ]]; then echo $bb_no_repo; exit 1; fi;
+# replace repo prefix
+github=${bitbucket//$bitbucket_prefix/$github_prefix};
+git remote set-url origin $github;
+if [[ $? -ne 0 ]]; then echo $gh_cant_set; exit 1; fi;
+echo "changed git origin to $github";
