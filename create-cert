@@ -1,0 +1,45 @@
+#!/bin/bash
+# create certificates for the given domains
+# example template string, the common name is substituted with domain name
+# '/CN={{CN}}/C=NL/ST=Noord Holland/L=Amsterdam/O=someOrganization/emailAddress=test@email.com'
+err_bad_template_string='Error: expecting a template string for CSR subject';
+key_name='mykey.key';
+notification_done='Done creating certificates'
+
+# Get required template_string from parameter
+while getopts "t:" opt
+do
+    case $opt in
+    t) template_string="$OPTARG"
+        ;;
+    *)  echo $err_bad_template_string;
+        exit 1;
+        ;;
+    esac >&2
+done
+
+# Verify that template_string file exists at given path
+[[ ! $template_string == '' ]] || { \
+  echo $err_bad_template_string; \
+  exit 1; \
+}
+
+# remove template_string flag and argument from argument list
+shift 2;
+
+# create a certificate key file
+ssh-keygen -f $key_name -N '';
+
+# loop over remaining arguments: the domains to make certificates for.
+for domain in "$@"
+do
+  printf 'creating certificate signing request for %s\n' $domain;
+  csr="${domain}.csr";
+  subj=`sed s/\{\{CN\}\}/${domain}/ <<<$template_string`;
+  openssl req -subj "$subj" -new -key $key_name -out $csr >/dev/null 2>&1;
+  printf 'creating certificate for %s\n' $domain;
+  cert="${domain}.crt";
+  openssl x509 -req -days 365 -in $csr -signkey $key_name -out $cert >/dev/null 2>&1;
+done
+
+echo $notification_done;
